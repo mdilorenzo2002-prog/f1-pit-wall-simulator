@@ -1,0 +1,1280 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>F1 Pit Wall Simulator 2026 - Ultimate Career</title>
+<style>
+  :root {
+    --bg-dark: #0b0d12;
+    --bg-card: #151922;
+    --bg-card-hover: #1d222f;
+    --border: #262c3a;
+    --accent: #e10600;
+    --accent-hover: #ff1e17;
+    --text-main: #f3f4f6;
+    --text-muted: #9ca3af;
+    --green: #10b981;
+    --yellow: #f59e0b;
+    --blue: #3b82f6;
+    --purple: #a855f7;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+  body { background-color: var(--bg-dark); color: var(--text-main); line-height: 1.4; padding-bottom: 40px; }
+  
+  /* Header */
+  header {
+    background: linear-gradient(90deg, #11141c 0%, #1a1014 100%);
+    border-bottom: 2px solid var(--accent);
+    padding: 12px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .brand { font-weight: 900; font-size: 1.1rem; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; }
+  .brand span { background: var(--accent); color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.85rem; }
+  .header-actions { display: flex; gap: 8px; align-items: center; }
+  
+  /* Buttons */
+  button {
+    cursor: pointer; border: none; border-radius: 8px; font-weight: 600;
+    transition: all 0.15s ease; font-size: 0.9rem; padding: 10px 14px;
+  }
+  button:disabled { opacity: 0.45; cursor: not-allowed; }
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-primary:hover:not(:disabled) { background: var(--accent-hover); }
+  .btn-secondary { background: #262c3a; color: var(--text-main); }
+  .btn-secondary:hover:not(:disabled) { background: #323a4c; }
+  .btn-success { background: var(--green); color: #052e16; }
+  .btn-warning { background: var(--yellow); color: #451a03; }
+  .btn-sm { padding: 6px 10px; font-size: 0.8rem; }
+
+  /* Layout */
+  .container { max-width: 960px; margin: 0 auto; padding: 16px; }
+  .card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 16px; margin-bottom: 16px;
+  }
+  .card-title { font-size: 1.05rem; font-weight: 700; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  @media (max-width: 640px) {
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  }
+
+  /* Forms */
+  label { display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 4px; font-weight: 600; }
+  input, select {
+    width: 100%; background: #0b0d12; border: 1px solid var(--border);
+    color: white; padding: 10px; border-radius: 8px; font-size: 0.95rem; margin-bottom: 12px;
+  }
+
+  /* Badges & Pills */
+  .badge { padding: 3px 8px; border-radius: 999px; font-size: 0.75rem; font-weight: 700; display: inline-block; }
+  .tire-S { background: #ef4444; color: white; }
+  .tire-M { background: #eab308; color: black; }
+  .tire-H { background: #f3f4f6; color: black; }
+  .tire-I { background: #22c55e; color: black; }
+  .tire-W { background: #3b82f6; color: white; }
+
+  /* Stats Bars */
+  .stat-row { margin-bottom: 10px; }
+  .stat-header { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 4px; }
+  .bar-bg { background: #0b0d12; height: 8px; border-radius: 4px; overflow: hidden; }
+  .bar-fill { height: 100%; background: var(--accent); transition: width 0.3s; }
+
+  /* Tables */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+  th { text-align: left; color: var(--text-muted); padding: 8px 6px; border-bottom: 1px solid var(--border); font-weight: 600; }
+  td { padding: 8px 6px; border-bottom: 1px solid #1c202b; }
+  tr.player-row { background: rgba(225, 6, 0, 0.14); font-weight: 700; }
+
+  /* Radio Box */
+  .radio-box {
+    background: #0e121a; border-left: 4px solid var(--blue);
+    padding: 12px; border-radius: 8px; margin-bottom: 14px;
+  }
+  .radio-header { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--blue); font-weight: 800; margin-bottom: 4px; display: flex; justify-content: space-between; }
+  .radio-msg { font-size: 0.92rem; color: #e5e7eb; }
+
+  /* Drawer / Modal Paddock */
+  .modal-backdrop {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.78);
+    display: none; justify-content: center; align-items: flex-end; z-index: 200;
+  }
+  .modal-backdrop.open { display: flex; }
+  .modal-panel {
+    background: var(--bg-card); width: 100%; max-width: 900px; max-height: 88vh;
+    border-radius: 16px 16px 0 0; padding: 18px; overflow-y: auto; border-top: 2px solid var(--accent);
+  }
+  .tabs { display: flex; gap: 6px; margin-bottom: 14px; overflow-x: auto; padding-bottom: 4px; }
+  .tab-btn { background: #0b0d12; color: var(--text-muted); border: 1px solid var(--border); white-space: nowrap; }
+  .tab-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+
+  /* Race Log */
+  .event-feed { max-height: 130px; overflow-y: auto; font-size: 0.82rem; background: #0b0d12; padding: 10px; border-radius: 8px; border: 1px solid var(--border); }
+  .event-item { margin-bottom: 5px; border-bottom: 1px solid #161a24; padding-bottom: 4px; }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand"><span>F1 2026</span> PIT WALL SIMULATOR</div>
+  <div class="header-actions" id="headerActions" style="display:none;">
+    <span id="budgetBadge" class="badge" style="background:#10b98122; color:#10b981; border:1px solid #10b981;">$0.0M</span>
+    <button class="btn-secondary btn-sm" onclick="openPaddock()">📊 Paddock</button>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- SCREEN 1: CREAZIONE CARRIERA -->
+  <div id="screenSetup" class="card">
+    <div class="card-title">🏎️ Nuova Carriera Formula 1 (Stagione 2026)</div>
+    <p style="color:var(--text-muted); font-size:0.88rem; margin-bottom:16px;">
+      Crea il tuo pilota, scegli età, nazionalità, scuderia ufficiale e gestisci budget, sviluppo tecnico e crescita sportiva.
+    </p>
+    <div class="grid-2">
+      <div>
+        <label>Nome e Cognome Pilota</label>
+        <input type="text" id="playerName" value="Marco Rossi" placeholder="Es. Marco Rossi">
+      </div>
+      <div>
+        <label>Numero di Gara</label>
+        <input type="number" id="playerNumber" value="27" min="2" max="99">
+      </div>
+    </div>
+
+    <div class="grid-3">
+      <div>
+        <label>Scegli Scuderia 2026</label>
+        <select id="teamSelect" onchange="previewTeamStats()">
+          <option value="mclaren">McLaren F1 Team</option>
+          <option value="ferrari">Scuderia Ferrari</option>
+          <option value="redbull">Red Bull Racing</option>
+          <option value="mercedes">Mercedes-AMG F1</option>
+          <option value="aston">Aston Martin Aramco</option>
+          <option value="williams">Williams Racing</option>
+          <option value="alpine">BWT Alpine F1</option>
+          <option value="rb">Racing Bulls</option>
+          <option value="haas">MoneyGram Haas F1</option>
+          <option value="audi">Audi F1 Team</option>
+          <option value="cadillac">Cadillac F1 Team</option>
+        </select>
+      </div>
+      <div>
+        <label>Fascia d'Età Pilota</label>
+        <select id="playerAgeGroup">
+          <option value="young">Giovane (20 anni) - Crescita rapida</option>
+          <option value="prime" selected>Nel pieno (26 anni) - Crescita bilanciata</option>
+          <option value="veteran">Veterano (35 anni) - Crescita lenta</option>
+        </select>
+      </div>
+      <div>
+        <label>Nazionalità Pilota</label>
+        <select id="playerNationality">
+          <option value="🇮🇹 Italiana">🇮🇹 Italiana</option>
+          <option value="🇬🇧 Britannica">🇬🇧 Britannica</option>
+          <option value="🇳🇱 Olandese">🇳🇱 Olandese</option>
+          <option value="🇫🇷 Francese">🇫🇷 Francese</option>
+          <option value="🇪🇸 Spagnola">🇪🇸 Spagnola</option>
+          <option value="🇩🇪 Tedesca">🇩🇪 Tedesca</option>
+          <option value="🇲🇽 Messicana">🇲🇽 Messicana</option>
+          <option value="🇦🇺 Australiana">🇦🇺 Australiana</option>
+          <option value="🇧🇷 Brasiliana">🇧🇷 Brasiliana</option>
+          <option value="🇲🇨 Monegasca">🇲🇨 Monegasca</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <label>Bravura Iniziale Tuo Pilota (Skill)</label>
+        <select id="playerInitialSkill">
+          <option value="82">Rookie (Skill 82)</option>
+          <option value="86" selected>Titolare (Skill 86)</option>
+          <option value="91">Top Driver (Skill 91)</option>
+        </select>
+      </div>
+      <div>
+        <label>Compagno di Squadra che sostituirai</label>
+        <select id="replaceDriverSelect"></select>
+      </div>
+    </div>
+    
+    <div id="teamPreviewBox" class="card" style="background:#0b0d12; margin-bottom:14px;"></div>
+
+    <button class="btn-primary" style="width:100%; padding:14px; font-size:1rem;" onclick="startCareer()">🚀 Inizia Stagione 2026</button>
+  </div>
+
+  <!-- SCREEN 2: GARAGE & PREPARAZIONE WEEKEND -->
+  <div id="screenGarage" class="hidden">
+    <div class="card" style="border-left: 4px solid var(--accent);">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:10px;">
+        <div>
+          <div style="font-size:0.78rem; color:var(--accent); font-weight:800; text-transform:uppercase;">Stagione <span id="seasonNum">2026</span> • Round <span id="roundNum">1</span>/24</div>
+          <h2 id="gpTitle" style="font-size:1.35rem; margin:2px 0;">GP d'Australia</h2>
+          <div id="gpDetails" style="font-size:0.85rem; color:var(--text-muted);">Melbourne • 58 Giri • Meteo previsto: Sereno</div>
+        </div>
+        <button class="btn-primary" style="padding:12px 18px;" onclick="goToQualifying()">🏁 Vai alle Qualifiche →</button>
+      </div>
+    </div>
+
+    <!-- Stato Monoposto, Ingegneri e Bravura Pilota con Fondi Condivisi -->
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">🔧 Prestazioni Monoposto & Team</div>
+        <div class="stat-row">
+          <div class="stat-header"><span>⚡ Power Unit (Motore)</span><span id="statEngineVal">80</span></div>
+          <div class="bar-bg"><div id="statEngineBar" class="bar-fill" style="width:80%"></div></div>
+        </div>
+        <div class="stat-row">
+          <div class="stat-header"><span>🌪️ Aerodinamica Attiva</span><span id="statAeroVal">80</span></div>
+          <div class="bar-bg"><div id="statAeroBar" class="bar-fill" style="width:80%; background:var(--blue);"></div></div>
+        </div>
+        <div class="stat-row">
+          <div class="stat-header"><span>🛞 Telaio & Sospensioni</span><span id="statChassisVal">80</span></div>
+          <div class="bar-bg"><div id="statChassisBar" class="bar-fill" style="width:80%; background:var(--green);"></div></div>
+        </div>
+        <div style="margin-top:12px; padding-top:10px; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <div style="font-size:0.82rem; font-weight:700;">🎧 Ingegneri: <span id="engRating" style="color:var(--yellow);">85/100</span></div>
+            <div id="engDesc" style="font-size:0.76rem; color:var(--text-muted);">Pit stop medi: 2.5s</div>
+          </div>
+          <button class="btn-secondary btn-sm" id="btnUpgradeEng" onclick="upgradeEngineers()">Potenzia ($6M)</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">👨‍✈️ Crescita Pilota (Budget Comune)</div>
+        <div style="margin-bottom:12px;">
+          <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:4px;">
+            <span>⭐ Skill Pilota (<span id="playerAgeLabel">26 anni</span>)</span><span id="playerSkillVal" style="color:var(--accent); font-weight:800;">86/99</span>
+          </div>
+          <div class="bar-bg"><div id="playerSkillBar" class="bar-fill" style="width:86%; background:var(--purple);"></div></div>
+          <div style="font-size:0.76rem; color:var(--text-muted); margin-top:4px;" id="growthRateText">Velocità di crescita: Normale</div>
+        </div>
+
+        <div style="padding-top:10px; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <div style="font-size:0.82rem; font-weight:700;">Investi Budget sul Pilota</div>
+            <div style="font-size:0.76rem; color:var(--text-muted);">Usa i fondi scuderia (+1 Skill)</div>
+          </div>
+          <button class="btn-secondary btn-sm" id="btnTrainDriver" onclick="trainDriver()">Sviluppa Pilota ($4M)</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Assetto & R&D -->
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">🎛️ Assetto Specifico Circuito</div>
+        <label>Incidenza Ali (<span id="setupWingLabel">Bilanciato</span>)</label>
+        <input type="range" id="setupWing" min="1" max="5" value="3" oninput="updateSetupPreview()">
+        
+        <label>Mappatura Ibrida MGU-K (<span id="setupErsLabel">Standard</span>)</label>
+        <input type="range" id="setupErs" min="1" max="5" value="3" oninput="updateSetupPreview()">
+
+        <div id="setupFeedback" style="font-size:0.8rem; padding:8px; background:#0b0d12; border-radius:6px; color:var(--green); margin-top:8px;">
+          Assetto neutro pronto per le prove.
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          <span>🏭 Reparto Ricerca & Sviluppo</span>
+        </div>
+        <div class="grid-3" id="rndContainer" style="grid-template-columns: 1fr;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN 3: QUALIFICHE -->
+  <div id="screenQuali" class="hidden">
+    <div class="card" style="border-left:4px solid var(--purple);">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+        <div>
+          <span class="badge" style="background:var(--purple); color:white;" id="qualiSessionBadge">QUALIFICHE • Q1</span>
+          <h2 id="qualiTrackName" style="font-size:1.25rem; margin-top:4px;">GP d'Australia</h2>
+          <div id="qualiWeatherInfo" style="font-size:0.84rem; color:var(--text-muted);">Pista Asciutta • 22 Piloti in pista</div>
+        </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <select id="qualiTireSelect" style="width:auto; margin:0;">
+            <option value="S">🔴 Gomma Soft Nuova</option>
+            <option value="M">🟡 Gomma Media</option>
+            <option value="I">🟢 Intermedia (Pioggia)</option>
+          </select>
+          <button class="btn-primary" id="btnRunQualiLap" onclick="runQualiLap()">⏱️ Scendi in Pista</button>
+          <button class="btn-success hidden" id="btnNextQualiStep" onclick="advanceQualiSession()">Prosegui →</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="qualiRadioBox" class="radio-box">
+      <div class="radio-header"><span>🎧 Ingegnere di Pista • Qualifica</span></div>
+      <div class="radio-msg" id="qualiRadioMsg">La pista si sta gommando. Scegli la mescola giusta e lancia il tuo giro!</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">⏱️ Classifica Tempi Sessione</div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Pos</th><th>Pilota</th><th>Naz</th><th>Team</th><th>Skill</th><th>Gomma</th><th>Tempo</th><th>Distacco</th></tr>
+          </thead>
+          <tbody id="qualiTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN 4: MURETTO BOX GARA -->
+  <div id="screenRace" class="hidden">
+    <div class="card" style="border-left:4px solid var(--accent); padding:12px 16px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+        <div>
+          <span style="font-weight:800; font-size:1.1rem;" id="raceGpName">GP d'Australia</span>
+          <span class="badge" style="background:#262c3a; margin-left:6px;" id="raceLapCounter">Giro 0 / 58</span>
+          <span class="badge" style="background:#3b82f633; color:#60a5fa; margin-left:4px;" id="raceWeatherBadge">☀️ Asciutto</span>
+          <span class="badge hidden" style="background:var(--yellow); color:black; margin-left:4px;" id="raceScBadge">⚠️ SAFETY CAR</span>
+        </div>
+        <div style="display:flex; gap:6px;">
+          <button class="btn-secondary btn-sm" id="btnPauseRace" onclick="toggleRacePause()">⏸️ Pausa</button>
+          <button class="btn-secondary btn-sm" id="btnSpeedRace" onclick="toggleRaceSpeed()">⏩ 1x</button>
+          <button class="btn-success hidden" id="btnFinishRace" onclick="finishWeekend()">🏁 Podio e Punti →</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="radio-box" id="raceRadioBox">
+      <div class="radio-header">
+        <span>🎧 Muretto Box • Ingegnere (<span id="raceEngBadge">Lv.85</span>)</span>
+        <span id="raceLapTimeInfo" style="color:var(--text-muted);">Ultimo giro: --:--.---</span>
+      </div>
+      <div class="radio-msg" id="raceRadioMsg">Semafori spenti! Gestisci gomme e batteria per tutta la gara.</div>
+    </div>
+
+    <div class="card">
+      <div class="grid-2" style="align-items:center;">
+        <div>
+          <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:6px; font-weight:700;">⚡ RITMO GARA & GESTIONE ERS</div>
+          <div style="display:flex; gap:6px;">
+            <button class="btn-secondary btn-sm" id="paceSave" onclick="setPace('save')">🔋 Risparmia</button>
+            <button class="btn-primary btn-sm" id="paceBalanced" onclick="setPace('balanced')">⚖️ Bilanciato</button>
+            <button class="btn-secondary btn-sm" id="pacePush" onclick="setPace('push')">🔥 Spingi</button>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:6px; font-weight:700;">🛞 CHIAMA PIT STOP (Prossimo giro)</div>
+          <div style="display:flex; gap:5px; flex-wrap:wrap;">
+            <button class="btn-sm tire-S" onclick="callPitStop('S')">Soft</button>
+            <button class="btn-sm tire-M" onclick="callPitStop('M')">Media</button>
+            <button class="btn-sm tire-H" onclick="callPitStop('H')">Hard</button>
+            <button class="btn-sm tire-I" onclick="callPitStop('I')">Inter</button>
+            <button class="btn-sm tire-W" onclick="callPitStop('W')">Wet</button>
+            <button class="btn-secondary btn-sm hidden" id="btnCancelPit" onclick="cancelPitStop()">❌ Annulla</button>
+          </div>
+          <div id="pitStatusText" style="font-size:0.78rem; color:var(--yellow); margin-top:4px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">
+        <span>📡 Classifica Live & Usura Gomme</span>
+        <span style="font-size:0.78rem; color:var(--text-muted);" id="yourCarSummary">Pos: - | Gomma: -</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Pos</th><th>Pilota</th><th>Naz</th><th>Team</th><th>Skill</th><th>Distacco</th><th>Gomma</th><th>Usura</th><th>Pit</th></tr>
+          </thead>
+          <tbody id="raceTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📻 Cronaca dal Circuito</div>
+      <div class="event-feed" id="raceEventFeed"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- MODAL PADDOCK -->
+<div class="modal-backdrop" id="paddockModal" onclick="if(event.target===this) closePaddock()">
+  <div class="modal-panel">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+      <h3 style="font-size:1.15rem;">📊 Centro Dati Paddock 2026</h3>
+      <button class="btn-secondary btn-sm" onclick="closePaddock()">✕ Chiudi</button>
+    </div>
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchPaddockTab('drivers', this)">🏆 Classifica Piloti & Skill</button>
+      <button class="tab-btn" onclick="switchPaddockTab('constructors', this)">🏢 Costruttori</button>
+      <button class="tab-btn" onclick="switchPaddockTab('cars', this)">📈 Valori Monoposto</button>
+      <button class="tab-btn" onclick="switchPaddockTab('calendar', this)">🗓️ Calendario 24 GP</button>
+      <button class="tab-btn" onclick="switchPaddockTab('reset', this)" style="color:#ef4444;">⚠️ Reset</button>
+    </div>
+    <div id="paddockContent"></div>
+  </div>
+</div>
+
+<script>
+// ==================== DATI STAGIONE 2026 ====================
+const TEAMS_2026 = [
+  { id: 'mclaren', name: 'McLaren F1 Team', short: 'MCL', color: '#ff8000', engine: 94, aero: 95, chassis: 94, engSkill: 95, budget: 24, drivers: [ {name:'Lando Norris', nat:'🇬🇧', skill:94}, {name:'Oscar Piastri', nat:'🇦🇺', skill:92} ] },
+  { id: 'ferrari', name: 'Scuderia Ferrari', short: 'FER', color: '#e10600', engine: 95, aero: 93, chassis: 93, engSkill: 91, budget: 25, drivers: [ {name:'Charles Leclerc', nat:'🇲🇨', skill:95}, {name:'Lewis Hamilton', nat:'🇬🇧', skill:94} ] },
+  { id: 'redbull', name: 'Red Bull Racing', short: 'RBR', color: '#1e41ff', engine: 92, aero: 94, chassis: 93, engSkill: 96, budget: 24, drivers: [ {name:'Max Verstappen', nat:'🇳🇱', skill:98}, {name:'Liam Lawson', nat:'🇳🇿', skill:85} ] },
+  { id: 'mercedes', name: 'Mercedes-AMG F1', short: 'MER', color: '#00d2be', engine: 94, aero: 91, chassis: 92, engSkill: 93, budget: 23, drivers: [ {name:'George Russell', nat:'🇬🇧', skill:93}, {name:'Kimi Antonelli', nat:'🇮🇹', skill:87} ] },
+  { id: 'aston', name: 'Aston Martin Aramco', short: 'AST', color: '#006f62', engine: 88, aero: 89, chassis: 87, engSkill: 86, budget: 20, drivers: [ {name:'Fernando Alonso', nat:'🇪🇸', skill:94}, {name:'Lance Stroll', nat:'🇨🇦', skill:82} ] },
+  { id: 'williams', name: 'Williams Racing', short: 'WIL', color: '#005aff', engine: 87, aero: 85, chassis: 85, engSkill: 83, budget: 16, drivers: [ {name:'Carlos Sainz', nat:'🇪🇸', skill:92}, {name:'Alexander Albon', nat:'🇹🇭', skill:89} ] },
+  { id: 'alpine', name: 'BWT Alpine F1', short: 'ALP', color: '#ff66c4', engine: 84, aero: 84, chassis: 83, engSkill: 80, budget: 15, drivers: [ {name:'Pierre Gasly', nat:'🇫🇷', skill:88}, {name:'Jack Doohan', nat:'🇦🇺', skill:82} ] },
+  { id: 'rb', name: 'Racing Bulls', short: 'VCARB', color: '#6692ff', engine: 86, aero: 83, chassis: 84, engSkill: 82, budget: 14, drivers: [ {name:'Yuki Tsunoda', nat:'🇯🇵', skill:87}, {name:'Isack Hadjar', nat:'🇫🇷', skill:83} ] },
+  { id: 'haas', name: 'MoneyGram Haas F1', short: 'HAA', color: '#b6babd', engine: 85, aero: 82, chassis: 82, engSkill: 79, budget: 13, drivers: [ {name:'Esteban Ocon', nat:'🇫🇷', skill:88}, {name:'Oliver Bearman', nat:'🇬🇧', skill:84} ] },
+  { id: 'audi', name: 'Audi F1 Team', short: 'AUD', color: '#bb0a30', engine: 82, aero: 81, chassis: 82, engSkill: 81, budget: 18, drivers: [ {name:'Nico Hülkenberg', nat:'🇩🇪', skill:87}, {name:'Gabriel Bortoleto', nat:'🇧🇷', skill:83} ] },
+  { id: 'cadillac', name: 'Cadillac F1 Team', short: 'CAD', color: '#d4af37', engine: 78, aero: 77, chassis: 78, engSkill: 74, budget: 15, drivers: [ {name:'Valtteri Bottas', nat:'🇫🇮', skill:87}, {name:'Sergio Pérez', nat:'🇲🇽', skill:86} ] }
+];
+
+const CALENDAR_2026 = [
+  { round: 1, name: "GP d'Australia", track: "Melbourne", laps: 58, baseTime: 79.5, rainChance: 0.25, idealWing: 3, idealErs: 4 },
+  { round: 2, name: "GP di Cina", track: "Shanghai", laps: 56, baseTime: 93.0, rainChance: 0.30, idealWing: 3, idealErs: 3 },
+  { round: 3, name: "GP del Giappone", track: "Suzuka", laps: 53, baseTime: 89.2, rainChance: 0.35, idealWing: 4, idealErs: 3 },
+  { round: 4, name: "GP del Bahrain", track: "Sakhir", laps: 57, baseTime: 91.4, rainChance: 0.05, idealWing: 3, idealErs: 4 },
+  { round: 5, name: "GP d'Arabia Saudita", track: "Jeddah", laps: 50, baseTime: 88.6, rainChance: 0.05, idealWing: 2, idealErs: 5 },
+  { round: 6, name: "GP di Miami", track: "Miami", laps: 57, baseTime: 89.8, rainChance: 0.25, idealWing: 3, idealErs: 4 },
+  { round: 7, name: "GP dell'Emilia-Romagna", track: "Imola", laps: 63, baseTime: 76.4, rainChance: 0.30, idealWing: 4, idealErs: 3 },
+  { round: 8, name: "GP di Monaco", track: "Monte Carlo", laps: 78, baseTime: 72.1, rainChance: 0.20, idealWing: 5, idealErs: 2 },
+  { round: 9, name: "GP di Spagna", track: "Barcellona", laps: 66, baseTime: 75.8, rainChance: 0.15, idealWing: 4, idealErs: 3 },
+  { round: 10, name: "GP del Canada", track: "Montréal", laps: 70, baseTime: 73.5, rainChance: 0.35, idealWing: 2, idealErs: 5 },
+  { round: 11, name: "GP d'Austria", track: "Spielberg", laps: 71, baseTime: 66.2, rainChance: 0.30, idealWing: 3, idealErs: 4 },
+  { round: 12, name: "GP di Gran Bretagna", track: "Silverstone", laps: 52, baseTime: 87.9, rainChance: 0.40, idealWing: 4, idealErs: 4 },
+  { round: 13, name: "GP del Belgio", track: "Spa-Francorchamps", laps: 44, baseTime: 105.4, rainChance: 0.50, idealWing: 2, idealErs: 5 },
+  { round: 14, name: "GP d'Ungheria", track: "Hungaroring", laps: 70, baseTime: 77.6, rainChance: 0.20, idealWing: 5, idealErs: 2 },
+  { round: 15, name: "GP d'Olanda", track: "Zandvoort", laps: 72, baseTime: 72.3, rainChance: 0.35, idealWing: 4, idealErs: 3 },
+  { round: 16, name: "GP d'Italia", track: "Monza", laps: 53, baseTime: 80.8, rainChance: 0.15, idealWing: 1, idealErs: 5 },
+  { round: 17, name: "GP dell'Azerbaijan", track: "Baku", laps: 51, baseTime: 102.5, rainChance: 0.10, idealWing: 2, idealErs: 5 },
+  { round: 18, name: "GP di Singapore", track: "Marina Bay", laps: 62, baseTime: 96.2, rainChance: 0.30, idealWing: 5, idealErs: 2 },
+  { round: 19, name: "GP degli Stati Uniti", track: "Austin", laps: 56, baseTime: 95.1, rainChance: 0.20, idealWing: 3, idealErs: 4 },
+  { round: 20, name: "GP del Messico", track: "Città del Messico", laps: 71, baseTime: 78.2, rainChance: 0.15, idealWing: 5, idealErs: 3 },
+  { round: 21, name: "GP del Brasile", track: "Interlagos", laps: 71, baseTime: 71.4, rainChance: 0.45, idealWing: 3, idealErs: 4 },
+  { round: 22, name: "GP di Las Vegas", track: "Las Vegas", laps: 50, baseTime: 93.8, rainChance: 0.05, idealWing: 1, idealErs: 5 },
+  { round: 23, name: "GP del Qatar", track: "Lusail", laps: 57, baseTime: 83.4, rainChance: 0.05, idealWing: 4, idealErs: 4 },
+  { round: 24, name: "GP di Abu Dhabi", track: "Yas Marina", laps: 58, baseTime: 86.1, rainChance: 0.05, idealWing: 3, idealErs: 4 }
+];
+
+const RND_NAMES = {
+  engine: ["Iniettori ad alta pressione", "Mappatura MGU-K 350kW", "Turbocompressore leggero", "Raffreddamento batterie", "Carburante sostenibile v2", "Camera combustione attiva", "Recupero cinetico evoluto", "Erogazione coppia elettrica", "Albero motore alleggerito", "Specifica Power Unit Finale"],
+  aero: ["Ala anteriore X-Mode", "Fondo Venturi sigillato", "Diffusore posteriore v2", "Pance rastremate", "Ala posteriore Z-Mode", "Bargeboard ottimizzati", "Condotti freni aerodinamici", "Beam wing sdoppiata", "Cofano motore snello", "Pacchetto Aero Completo"],
+  chassis: ["Sospensioni push-rod", "Ripartizione pesi ottimale", "Telaio carbonio leggero", "Gestione termica gomme", "Differenziale elettronico", "Impianto frenante carbonio", "Barre antirollio attive", "Scatola cambio compatta", "Geometria sterzo precisa", "Monoscocca Evoluzione"]
+};
+
+const POINTS_SYSTEM = [25, 18, 15, 12, 10, 8, 6, 4, 2, 1];
+
+// ==================== STATO GIOCO ====================
+let state = null;
+let qualiState = null;
+let raceState = null;
+let raceTimer = null;
+
+// ==================== INIZIALIZZAZIONE ====================
+function init() {
+  previewTeamStats();
+  const saved = localStorage.getItem('f1_2026_career_v6');
+  if (saved) {
+    try {
+      state = JSON.parse(saved);
+      if (state && state.round && state.playerTeamId && state.drivers && state.teams) {
+        showScreen('garage');
+        renderGarage();
+        return;
+      }
+    } catch (e) {
+      console.error("Errore salvataggio", e);
+      localStorage.removeItem('f1_2026_career_v6');
+    }
+  }
+  showScreen('setup');
+}
+
+function previewTeamStats() {
+  const teamId = document.getElementById('teamSelect').value;
+  const team = TEAMS_2026.find(t => t.id === teamId);
+  if (!team) return;
+  document.getElementById('teamPreviewBox').innerHTML = `
+    <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+      <strong style="color:${team.color}; font-size:1rem;">${team.name}</strong>
+      <span class="badge" style="background:#10b98122; color:#10b981;">Budget Iniziale: $${team.budget}M</span>
+    </div>
+    <div style="font-size:0.82rem; color:var(--text-muted); display:flex; gap:12px; flex-wrap:wrap;">
+      <span>⚡ Motore: <b>${team.engine}</b></span>
+      <span>🌪️ Aero: <b>${team.aero}</b></span>
+      <span>🛞 Telaio: <b>${team.chassis}</b></span>
+      <span>🎧 Ingegneri: <b>${team.engSkill}</b></span>
+    </div>
+  `;
+  const repSel = document.getElementById('replaceDriverSelect');
+  repSel.innerHTML = '';
+  team.drivers.forEach((d, idx) => {
+    const opt = document.createElement('option');
+    opt.value = idx;
+    opt.textContent = `Sostituisci ${d.nat} ${d.name} (Skill ${d.skill})`;
+    repSel.appendChild(opt);
+  });
+}
+
+function startCareer() {
+  const pName = document.getElementById('playerName').value.trim() || 'Pilota';
+  const pNum = parseInt(document.getElementById('playerNumber').value) || 27;
+  const teamId = document.getElementById('teamSelect').value;
+  const replaceIdx = parseInt(document.getElementById('replaceDriverSelect').value);
+  const initialSkill = parseInt(document.getElementById('playerInitialSkill').value);
+  const ageGroup = document.getElementById('playerAgeGroup').value;
+  const nat = document.getElementById('playerNationality').value.split(' ')[0];
+
+  const teams = JSON.parse(JSON.stringify(TEAMS_2026));
+  const drivers = [];
+
+  teams.forEach(t => {
+    t.points = 0;
+    t.drivers.forEach((dObj, idx) => {
+      if (t.id === teamId && idx === replaceIdx) {
+        drivers.push({
+          id: 'player', name: pName, number: pNum, teamId: t.id,
+          skill: initialSkill, points: 0, isPlayer: true,
+          ageGroup: ageGroup, nat: nat, age: ageGroup === 'young' ? 20 : ageGroup === 'prime' ? 26 : 35
+        });
+      } else {
+        drivers.push({
+          id: `${t.id}_${idx}`, name: dObj.name, number: Math.floor(Math.random()*89)+2,
+          teamId: t.id, skill: dObj.skill, points: 0, isPlayer: false,
+          ageGroup: 'prime', nat: dObj.nat, age: 26
+        });
+      }
+    });
+  });
+
+  const playerTeam = teams.find(t => t.id === teamId);
+  state = {
+    season: 2026,
+    round: 1,
+    budget: playerTeam.budget,
+    playerTeamId: teamId,
+    teams: teams,
+    drivers: drivers,
+    rndLevels: { engine: 0, aero: 0, chassis: 0 },
+    setup: { wing: 3, ers: 3 },
+    resultsHistory: []
+  };
+  saveState();
+  showScreen('garage');
+  renderGarage();
+}
+
+function saveState() {
+  localStorage.setItem('f1_2026_career_v6', JSON.stringify(state));
+}
+
+function showScreen(name) {
+  ['screenSetup', 'screenGarage', 'screenQuali', 'screenRace'].forEach(id => {
+    document.getElementById(id).classList.add('hidden');
+  });
+  document.getElementById('headerActions').style.display = name === 'setup' ? 'none' : 'flex';
+  if (name === 'setup') document.getElementById('screenSetup').classList.remove('hidden');
+  if (name === 'garage') document.getElementById('screenGarage').classList.remove('hidden');
+  if (name === 'quali') document.getElementById('screenQuali').classList.remove('hidden');
+  if (name === 'race') document.getElementById('screenRace').classList.remove('hidden');
+  if (state) document.getElementById('budgetBadge').textContent = `$${state.budget.toFixed(1)}M`;
+}
+
+// ==================== GARAGE & DRIVER TRAINING ====================
+function renderGarage() {
+  const gp = CALENDAR_2026[state.round - 1];
+  const pTeam = state.teams.find(t => t.id === state.playerTeamId);
+  const pDriver = state.drivers.find(d => d.isPlayer);
+
+  document.getElementById('seasonNum').textContent = state.season;
+  document.getElementById('roundNum').textContent = state.round;
+  document.getElementById('gpTitle').textContent = `${gp.name} (${gp.track})`;
+  document.getElementById('gpDetails').textContent = `${gp.laps} Giri • Rischio Pioggia: ${Math.round(gp.rainChance*100)}% • Caratteristica: ${gp.idealWing <= 2 ? 'Alta Velocità' : gp.idealWing >= 4 ? 'Alto Carico Aero' : 'Misto'}`;
+
+  document.getElementById('statEngineVal').textContent = `${pTeam.engine}/100`;
+  document.getElementById('statEngineBar').style.width = `${pTeam.engine}%`;
+  document.getElementById('statAeroVal').textContent = `${pTeam.aero}/100`;
+  document.getElementById('statAeroBar').style.width = `${pTeam.aero}%`;
+  document.getElementById('statChassisVal').textContent = `${pTeam.chassis}/100`;
+  document.getElementById('statChassisBar').style.width = `${pTeam.chassis}%`;
+
+  const pitTime = (3.4 - (pTeam.engSkill - 70) * 0.045).toFixed(2);
+  document.getElementById('engRating').textContent = `${pTeam.engSkill}/100`;
+  document.getElementById('engDesc').textContent = `Pit stop medi: ~${pitTime}s`;
+  document.getElementById('btnUpgradeEng').disabled = pTeam.engSkill >= 99 || state.budget < 6;
+
+  document.getElementById('playerSkillVal').textContent = `${pDriver.skill}/99`;
+  document.getElementById('playerSkillBar').style.width = `${pDriver.skill}%`;
+  document.getElementById('playerAgeLabel').textContent = `${pDriver.age} anni`;
+  
+  const growthText = pDriver.ageGroup === 'young' ? '🚀 Rapida (Giovane)' : pDriver.ageGroup === 'prime' ? '⚖️ Bilanciata' : '🐢 Lenta (Veterano)';
+  document.getElementById('growthRateText').textContent = `Velocità di crescita: ${growthText}`;
+  document.getElementById('btnTrainDriver').disabled = pDriver.skill >= 99 || state.budget < 4;
+
+  updateSetupPreview();
+
+  const container = document.getElementById('rndContainer');
+  container.innerHTML = '';
+  const areas = [
+    { key: 'engine', label: '⚡ Motore', color: 'var(--accent)' },
+    { key: 'aero', label: '🌪️ Aero', color: 'var(--blue)' },
+    { key: 'chassis', label: '🛞 Telaio', color: 'var(--green)' }
+  ];
+
+  areas.forEach(a => {
+    const lv = state.rndLevels[a.key];
+    const cost = 4 + lv * 1.5;
+    const nextName = lv < 10 ? RND_NAMES[a.key][lv] : 'Massimo';
+    const div = document.createElement('div');
+    div.style.cssText = 'background:#0b0d12; padding:10px; border-radius:8px; border:1px solid var(--border); margin-bottom:8px;';
+    div.innerHTML = `
+      <div style="display:flex; justify-content:space-between; font-weight:700; font-size:0.85rem; margin-bottom:4px;">
+        <span>${a.label}</span>
+        <span style="color:${a.color};">Lv. ${lv}/10</span>
+      </div>
+      <div style="font-size:0.75rem; color:var(--text-muted); margin-bottom:6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${nextName}</div>
+      <button class="btn-secondary btn-sm" style="width:100%; padding:6px;" ${lv >= 10 || state.budget < cost ? 'disabled' : ''} onclick="buyUpgrade('${a.key}')">
+        ${lv >= 10 ? '✅ Max' : `Sviluppa ($${cost.toFixed(1)}M)`}
+      </button>
+    `;
+    container.appendChild(div);
+  });
+}
+
+function trainDriver() {
+  const pDriver = state.drivers.find(d => d.isPlayer);
+  if (state.budget < 4 || pDriver.skill >= 99) return;
+  state.budget -= 4;
+  pDriver.skill = Math.min(99, pDriver.skill + 1);
+  saveState();
+  renderGarage();
+}
+
+function updateSetupPreview() {
+  const wing = parseInt(document.getElementById('setupWing').value);
+  const ers = parseInt(document.getElementById('setupErs').value);
+  state.setup = { wing, ers };
+
+  const wingLabels = ['1 - Scarico (Monza)', '2 - Basso Carico', '3 - Bilanciato', '4 - Alto Carico', '5 - Massimo Carico (Monaco)'];
+  const ersLabels = ['1 - Conservativo', '2 - Endurance', '3 - Standard', '4 - Aggressivo', '5 - Qualifica / Attacco'];
+  document.getElementById('setupWingLabel').textContent = wingLabels[wing - 1];
+  document.getElementById('setupErsLabel').textContent = ersLabels[ers - 1];
+
+  const gp = CALENDAR_2026[state.round - 1];
+  const diff = Math.abs(wing - gp.idealWing) + Math.abs(ers - gp.idealErs);
+  const fb = document.getElementById('setupFeedback');
+  if (diff === 0) {
+    fb.style.color = 'var(--green)';
+    fb.textContent = '✨ Assetto perfetto per questo circuito! (+0.35s)';
+  } else if (diff <= 2) {
+    fb.style.color = 'var(--blue)';
+    fb.textContent = '👍 Buon bilanciamento per la pista. (+0.15s)';
+  } else {
+    fb.style.color = 'var(--yellow)';
+    fb.textContent = '⚠️ Assetto sub-ottimale per questo tracciato.';
+  }
+}
+
+function buyUpgrade(area) {
+  const lv = state.rndLevels[area];
+  const cost = 4 + lv * 1.5;
+  if (lv >= 10 || state.budget < cost) return;
+  state.budget -= cost;
+  state.rndLevels[area]++;
+  const pTeam = state.teams.find(t => t.id === state.playerTeamId);
+  pTeam[area] = Math.min(100, pTeam[area] + 1);
+  saveState();
+  renderGarage();
+}
+
+function upgradeEngineers() {
+  const pTeam = state.teams.find(t => t.id === state.playerTeamId);
+  if (state.budget < 6 || pTeam.engSkill >= 99) return;
+  state.budget -= 6;
+  pTeam.engSkill = Math.min(99, pTeam.engSkill + 3);
+  saveState();
+  renderGarage();
+}
+
+// ==================== QUALIFICHE (Q1 -> Q2 -> Q3) ====================
+function getCarPace(teamId) {
+  const t = state.teams.find(x => x.id === teamId);
+  return (t.engine * 0.36 + t.aero * 0.36 + t.chassis * 0.28);
+}
+
+function goToQualifying() {
+  const gp = CALENDAR_2026[state.round - 1];
+  const isWet = Math.random() < (gp.rainChance * 0.7);
+  qualiState = {
+    session: 1,
+    isWet: isWet,
+    playerRan: false,
+    entries: state.drivers.map(d => ({
+      driver: d,
+      team: state.teams.find(t => t.id === d.teamId),
+      time: null,
+      tire: isWet ? 'I' : 'S',
+      eliminatedIn: null
+    }))
+  };
+  if (isWet) document.getElementById('qualiTireSelect').value = 'I';
+  else document.getElementById('qualiTireSelect').value = 'S';
+
+  showScreen('quali');
+  simulateAiQualiTimes();
+  renderQuali();
+}
+
+function computeLapTime(entry, tire, isPlayer) {
+  const gp = CALENDAR_2026[state.round - 1];
+  const carRating = getCarPace(entry.team.id);
+  const pacePenalty = (100 - carRating) * 0.05 + (100 - entry.driver.skill) * 0.045;
+  
+  let setupBonus = 0;
+  if (isPlayer) {
+    const diff = Math.abs(state.setup.wing - gp.idealWing) + Math.abs(state.setup.ers - gp.idealErs);
+    setupBonus = diff === 0 ? -0.35 : diff <= 2 ? -0.15 : 0.1;
+  }
+
+  let tireDelta = qualiState.isWet ? (tire === 'I' ? 6.5 : tire === 'W' ? 7.8 : 16.0) : (tire === 'S' ? 0 : tire === 'M' ? 0.55 : 2.8);
+  const randomVar = (Math.random() - 0.5) * 0.32;
+  return gp.baseTime + pacePenalty + tireDelta + setupBonus + randomVar;
+}
+
+function simulateAiQualiTimes() {
+  qualiState.entries.forEach(e => {
+    if (e.eliminatedIn || e.driver.isPlayer) return;
+    const aiTire = qualiState.isWet ? 'I' : 'S';
+    e.tire = aiTire;
+    e.time = computeLapTime(e, aiTire, false);
+  });
+}
+
+function runQualiLap() {
+  const pEntry = qualiState.entries.find(e => e.driver.isPlayer);
+  const tire = document.getElementById('qualiTireSelect').value;
+  pEntry.tire = tire;
+  pEntry.time = computeLapTime(pEntry, tire, true);
+  qualiState.playerRan = true;
+
+  qualiState.entries.forEach(e => {
+    if (!e.eliminatedIn && !e.driver.isPlayer && Math.random() < 0.4) {
+      e.time = Math.min(e.time, computeLapTime(e, e.tire, false));
+    }
+  });
+
+  document.getElementById('btnRunQualiLap').disabled = true;
+  document.getElementById('btnNextQualiStep').classList.remove('hidden');
+  renderQuali();
+}
+
+function renderQuali() {
+  const gp = CALENDAR_2026[state.round - 1];
+  const s = qualiState.session;
+  const cutoff = s === 1 ? 16 : s === 2 ? 10 : 1;
+
+  document.getElementById('qualiSessionBadge').textContent = `QUALIFICHE • Q${s}`;
+  document.getElementById('qualiTrackName').textContent = `${gp.name} (${gp.track})`;
+  document.getElementById('qualiWeatherInfo').textContent = `${qualiState.isWet ? '🌧️ Bagnata' : '☀️ Asciutta'} • ${s === 1 ? 'Eliminati: 17°-22°' : s === 2 ? 'Eliminati: 11°-16°' : 'Pole Shootout (Top 10)'}`;
+
+  const active = qualiState.entries.filter(e => !e.eliminatedIn);
+  const eliminated = qualiState.entries.filter(e => e.eliminatedIn);
+
+  active.sort((a, b) => (a.time === null ? 1 : b.time === null ? -1 : a.time - b.time));
+  const bestTime = active[0]?.time;
+  const tbody = document.getElementById('qualiTableBody');
+  tbody.innerHTML = '';
+
+  active.forEach((e, idx) => {
+    const pos = idx + 1;
+    const isDanger = s < 3 && pos > cutoff;
+    const tr = document.createElement('tr');
+    if (e.driver.isPlayer) tr.className = 'player-row';
+    if (isDanger) tr.style.color = '#f87171';
+    tr.innerHTML = `
+      <td><strong>P${pos}</strong></td>
+      <td>${e.driver.name}</td>
+      <td>${e.driver.nat || '🏳️'}</td>
+      <td><span style="color:${e.team.color}; font-weight:700;">${e.team.short}</span></td>
+      <td><b style="color:var(--purple);">${e.driver.skill}</b></td>
+      <td><span class="badge tire-${e.tire}">${e.tire}</span></td>
+      <td>${e.time ? formatLapTime(e.time) : 'Ai box'}</td>
+      <td>${e.time && bestTime ? (idx === 0 ? 'LEADER' : `+${(e.time - bestTime).toFixed(3)}s`) : '-'}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  eliminated.forEach((e, idx) => {
+    const pos = active.length + idx + 1;
+    const tr = document.createElement('tr');
+    tr.style.opacity = '0.45';
+    tr.innerHTML = `
+      <td>P${pos} (OUT)</td>
+      <td>${e.driver.name}</td>
+      <td>${e.driver.nat || '🏳️'}</td>
+      <td>${e.team.short}</td>
+      <td><b>${e.driver.skill}</b></td>
+      <td>-</td>
+      <td>${e.time ? formatLapTime(e.time) : '-'}</td>
+      <td>Eliminato Q${e.eliminatedIn}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  const pPos = active.findIndex(e => e.driver.isPlayer) + 1;
+  const radio = document.getElementById('qualiRadioMsg');
+  if (!qualiState.playerRan) {
+    radio.textContent = qualiState.isWet ? "Piove! Monta le Intermedie e fai il tempo." : `Siamo in Q${s}. Sfrutta la bravura del tuo pilota (Skill ${active.find(e=>e.driver.isPlayer)?.driver.skill}) per artigliare la Q${s+1}.`;
+  } else {
+    radio.textContent = s < 3 && pPos > cutoff ? `Siamo P${pPos}, eliminati in Q${s}.` : s < 3 ? `Grande giro! Sei P${pPos}, qualificato!` : `Pole Shootout concluso! Partirai P${pPos}!`;
+  }
+}
+
+function advanceQualiSession() {
+  const s = qualiState.session;
+  const cutoff = s === 1 ? 16 : s === 2 ? 10 : 0;
+  const active = qualiState.entries.filter(e => !e.eliminatedIn);
+  active.sort((a, b) => a.time - b.time);
+
+  if (s < 3) {
+    active.forEach((e, idx) => {
+      if (idx + 1 > cutoff) e.eliminatedIn = s;
+      else e.time = null;
+    });
+    const pEntry = qualiState.entries.find(e => e.driver.isPlayer);
+    if (pEntry.eliminatedIn) {
+      for (let rem = s + 1; rem <= 3; rem++) {
+        const remActive = qualiState.entries.filter(e => !e.eliminatedIn);
+        remActive.forEach(e => e.time = computeLapTime(e, qualiState.isWet ? 'I' : 'S', false));
+        remActive.sort((a, b) => a.time - b.time);
+        const remCut = rem === 2 ? 10 : 0;
+        if (remCut > 0) remActive.forEach((e, i) => { if (i + 1 > remCut) e.eliminatedIn = rem; });
+      }
+      startRaceFromQuali();
+      return;
+    }
+    qualiState.session++;
+    qualiState.playerRan = false;
+    document.getElementById('btnRunQualiLap').disabled = false;
+    document.getElementById('btnNextQualiStep').classList.add('hidden');
+    simulateAiQualiTimes();
+    renderQuali();
+  } else {
+    startRaceFromQuali();
+  }
+}
+
+function formatLapTime(sec) {
+  const m = Math.floor(sec / 60);
+  const s = (sec % 60).toFixed(3).padStart(6, '0');
+  return `${m}:${s}`;
+}
+
+// ==================== GARA ====================
+function startRaceFromQuali() {
+  const gp = CALENDAR_2026[state.round - 1];
+  const grid = [...qualiState.entries].sort((a, b) => {
+    if ((a.eliminatedIn || 99) !== (b.eliminatedIn || 99)) return (b.eliminatedIn || 99) - (a.eliminatedIn || 99);
+    return (a.time || 999) - (b.time || 999);
+  });
+
+  const startWet = Math.random() < (gp.rainChance * 0.5);
+  raceState = {
+    lap: 0,
+    totalLaps: gp.laps,
+    weather: startWet ? 'rain' : 'dry',
+    safetyCar: 0,
+    paused: false,
+    speed: 1,
+    finished: false,
+    cars: grid.map((entry, idx) => ({
+      driver: entry.driver,
+      team: entry.team,
+      totalTime: idx * 0.35,
+      tire: startWet ? 'I' : (idx < 10 ? 'S' : 'M'),
+      wear: 0,
+      pits: 0,
+      pace: 'balanced',
+      pitCall: null,
+      dnf: false
+    }))
+  };
+
+  showScreen('race');
+  document.getElementById('raceGpName').textContent = gp.name;
+  const pTeam = state.teams.find(t => t.id === state.playerTeamId);
+  document.getElementById('raceEngBadge').textContent = `Lv.${pTeam.engSkill}`;
+  document.getElementById('raceEventFeed').innerHTML = '';
+  document.getElementById('btnFinishRace').classList.add('hidden');
+  document.getElementById('btnPauseRace').classList.remove('hidden');
+
+  logRaceEvent(`🚦 Partenza del ${gp.name}! ${startWet ? 'Pista bagnata!' : 'Condizioni asciutte.'}`);
+  renderRace();
+  startRaceLoop();
+}
+
+function startRaceLoop() {
+  if (raceTimer) clearInterval(raceTimer);
+  raceTimer = setInterval(() => {
+    if (!raceState || raceState.paused || raceState.finished) return;
+    simulateRaceLap();
+  }, raceState.speed === 1 ? 1400 : 550);
+}
+
+function toggleRacePause() {
+  raceState.paused = !raceState.paused;
+  document.getElementById('btnPauseRace').textContent = raceState.paused ? '▶️ Riprendi' : '⏸️ Pausa';
+}
+
+function toggleRaceSpeed() {
+  raceState.speed = raceState.speed === 1 ? 2 : 1;
+  document.getElementById('btnSpeedRace').textContent = `⏩ ${raceState.speed}x`;
+  startRaceLoop();
+}
+
+function setPace(mode) {
+  const pCar = raceState.cars.find(c => c.driver.isPlayer);
+  pCar.pace = mode;
+  ['Save', 'Balanced', 'Push'].forEach(m => {
+    document.getElementById('pace' + m).className = (m.toLowerCase() === mode) ? 'btn-primary btn-sm' : 'btn-secondary btn-sm';
+  });
+}
+
+function callPitStop(tire) {
+  const pCar = raceState.cars.find(c => c.driver.isPlayer);
+  pCar.pitCall = tire;
+  document.getElementById('pitStatusText').textContent = `Box confermati: gomma ${tire}`;
+  document.getElementById('btnCancelPit').classList.remove('hidden');
+}
+
+function cancelPitStop() {
+  const pCar = raceState.cars.find(c => c.driver.isPlayer);
+  pCar.pitCall = null;
+  document.getElementById('pitStatusText').textContent = '';
+  document.getElementById('btnCancelPit').classList.add('hidden');
+}
+
+function simulateRaceLap() {
+  const gp = CALENDAR_2026[state.round - 1];
+  raceState.lap++;
+
+  if (raceState.lap % 5 === 0 && Math.random() < gp.rainChance * 0.45) {
+    const prev = raceState.weather;
+    const states = ['dry', 'rain', 'heavy'];
+    raceState.weather = states[Math.floor(Math.random() * (gp.rainChance > 0.35 ? 3 : 2))];
+    if (prev !== raceState.weather) {
+      logRaceEvent(`Giro ${raceState.lap}: ${raceState.weather === 'dry' ? '☀️ La pista si asciuga!' : raceState.weather === 'rain' ? '🌦️ Inizia a piovere!' : '⛈️ Diluvio in corso!'}`);
+    }
+  }
+
+  if (raceState.safetyCar > 0) {
+    raceState.safetyCar--;
+    if (raceState.safetyCar === 0) logRaceEvent(`Giro ${raceState.lap}: 🟢 Safety Car rientra.`);
+  } else if (raceState.lap > 3 && raceState.lap < raceState.totalLaps - 4 && Math.random() < 0.025) {
+    raceState.safetyCar = 3;
+    logRaceEvent(`Giro ${raceState.lap}: ⚠️ SAFETY CAR in pista!`);
+  }
+
+  raceState.cars.forEach(car => {
+    if (car.dnf) return;
+
+    const carPace = getCarPace(car.team.id);
+    let lapTime = gp.baseTime + (100 - carPace) * 0.046 + (100 - car.driver.skill) * 0.04;
+
+    if (car.wear > 78 && Math.random() < (105 - car.driver.skill) * 0.008) {
+      lapTime += 3.5;
+      if (car.driver.isPlayer) logRaceEvent(`Giro ${raceState.lap}: ⚠️ Errore di guida! Bloccaggio e lungo in curva.`);
+    }
+
+    if (raceState.weather === 'dry') {
+      if (car.tire === 'S') lapTime -= 0.45;
+      else if (car.tire === 'H') lapTime += 0.45;
+      else if (car.tire === 'I' || car.tire === 'W') lapTime += 6.0;
+    } else if (raceState.weather === 'rain') {
+      if (car.tire === 'I') lapTime += 5.5;
+      else if (car.tire === 'W') lapTime += 7.2;
+      else lapTime += 14.0;
+    } else {
+      if (car.tire === 'W') lapTime += 8.0;
+      else if (car.tire === 'I') lapTime += 11.5;
+      else lapTime += 20.0;
+    }
+
+    const wearRates = { S: 4.6, M: 2.9, H: 1.9, I: 2.7, W: 2.4 };
+    let skillFactor = 1.0 - (car.driver.skill - 80) * 0.004;
+    let mult = (car.pace === 'push' ? 1.35 : car.pace === 'save' ? 0.72 : 1.0) * skillFactor;
+    if (raceState.safetyCar > 0) mult = 0.35;
+    car.wear = Math.min(100, car.wear + wearRates[car.tire] * mult);
+
+    if (car.wear > 70) lapTime += (car.wear - 70) * 0.085;
+    if (car.pace === 'push') lapTime -= 0.32;
+    if (car.pace === 'save') lapTime += 0.35;
+
+    if (!car.driver.isPlayer) {
+      const wrongTire = (raceState.weather === 'dry' && ['I','W'].includes(car.tire)) || (raceState.weather !== 'dry' && ['S','M','H'].includes(car.tire));
+      if ((wrongTire || car.wear > 76) && raceState.lap < raceState.totalLaps - 2) {
+        car.pitCall = raceState.weather === 'heavy' ? 'W' : raceState.weather === 'rain' ? 'I' : 'M';
+      }
+    }
+
+    if (car.pitCall) {
+      const pitDuration = 21.5 - (car.team.engSkill - 70) * 0.05 + (Math.random() * 0.8);
+      lapTime += (raceState.safetyCar > 0 ? pitDuration * 0.65 : pitDuration);
+      car.tire = car.pitCall;
+      car.wear = 0;
+      car.pits++;
+      if (car.driver.isPlayer) {
+        logRaceEvent(`Giro ${raceState.lap}: 🔧 Pit Stop completato. Gomma ${car.tire}.`);
+        cancelPitStop();
+      }
+      car.pitCall = null;
+    }
+
+    lapTime += (Math.random() - 0.5) * 0.42;
+    if (raceState.safetyCar > 0) lapTime = gp.baseTime + 22;
+    car.lastLap = lapTime;
+    car.totalTime += lapTime;
+  });
+
+  raceState.cars.sort((a, b) => a.totalTime - b.totalTime);
+  if (raceState.safetyCar > 0) {
+    raceState.cars.forEach((c, i) => { if (i > 0) c.totalTime = raceState.cars[0].totalTime + i * 0.6; });
+  }
+
+  updateEngineerAdvice();
+  renderRace();
+
+  if (raceState.lap >= raceState.totalLaps) {
+    raceState.finished = true;
+    clearInterval(raceTimer);
+    document.getElementById('btnPauseRace').classList.add('hidden');
+    document.getElementById('btnFinishRace').classList.remove('hidden');
+    logRaceEvent(`🏁 Bandiera a scacchi! Vince ${raceState.cars[0].driver.name}!`);
+  }
+}
+
+function updateEngineerAdvice() {
+  const pCar = raceState.cars.find(c => c.driver.isPlayer);
+  const pos = raceState.cars.indexOf(pCar) + 1;
+  const engSkill = pCar.team.engSkill;
+  const msgEl = document.getElementById('raceRadioMsg');
+
+  document.getElementById('raceLapTimeInfo').textContent = `Ultimo giro: ${formatLapTime(pCar.lastLap || 80)}`;
+
+  const wrongTire = (raceState.weather === 'dry' && ['I','W'].includes(pCar.tire)) || (raceState.weather !== 'dry' && ['S','M','H'].includes(pCar.tire));
+  if (wrongTire) {
+    msgEl.innerHTML = `<strong style="color:#ef4444;">⚠️ MESCOLA ERRATA!</strong> Rientra subito ai box!`;
+    return;
+  }
+
+  if (raceState.safetyCar > 0 && pCar.wear > 42 && !pCar.pitCall) {
+    msgEl.innerHTML = `💡 <strong style="color:var(--yellow);">Safety Car in pista:</strong> Occasione d'oro per montare gomme fresche perdendo meno tempo!`;
+    return;
+  }
+
+  if (pCar.wear >= 75) {
+    msgEl.innerHTML = `<strong style="color:var(--yellow);">🛞 Gomme al limite (${Math.round(pCar.wear)}%):</strong> Rientriamo per il pit stop.`;
+    return;
+  }
+
+  if (engSkill >= 88 && pos > 1) {
+    const ahead = raceState.cars[pos - 2];
+    const gap = (pCar.totalTime - ahead.totalTime).toFixed(1);
+    if (gap < 2.0) {
+      msgEl.textContent = `Siamo a ${gap}s da ${ahead.driver.name}. Spingi con il tuo pilota per il sorpasso!`;
+      return;
+    }
+  }
+
+  msgEl.textContent = `Posizione P${pos}. Usura gomme ${Math.round(pCar.wear)}%. Guidabilità ottima.`;
+}
+
+function renderRace() {
+  document.getElementById('raceLapCounter').textContent = `Giro ${raceState.lap} / ${raceState.totalLaps}`;
+  const wBadge = document.getElementById('raceWeatherBadge');
+  wBadge.textContent = raceState.weather === 'dry' ? '☀️ Asciutto' : raceState.weather === 'rain' ? '🌦️ Pioggia' : '⛈️ Diluvio';
+  
+  const scBadge = document.getElementById('raceScBadge');
+  if (raceState.safetyCar > 0) scBadge.classList.remove('hidden');
+  else scBadge.classList.add('hidden');
+
+  const pCar = raceState.cars.find(c => c.driver.isPlayer);
+  const pPos = raceState.cars.indexOf(pCar) + 1;
+  document.getElementById('yourCarSummary').textContent = `Tu: P${pPos} | Gomma ${pCar.tire} (${Math.round(pCar.wear)}%)`;
+
+  const leaderTime = raceState.cars[0].totalTime;
+  const tbody = document.getElementById('raceTableBody');
+  tbody.innerHTML = '';
+
+  raceState.cars.forEach((c, idx) => {
+    const tr = document.createElement('tr');
+    if (c.driver.isPlayer) tr.className = 'player-row';
+    const gap = idx === 0 ? 'LEADER' : `+${(c.totalTime - leaderTime).toFixed(1)}s`;
+    const wearColor = c.wear > 75 ? '#ef4444' : c.wear > 50 ? '#f59e0b' : '#10b981';
+    tr.innerHTML = `
+      <td><strong>${idx + 1}</strong></td>
+      <td>${c.driver.name}</td>
+      <td>${c.driver.nat || '🏳️'}</td>
+      <td><span style="color:${c.team.color}; font-weight:700;">${c.team.short}</span></td>
+      <td><b>${c.driver.skill}</b></td>
+      <td>${gap}</td>
+      <td><span class="badge tire-${c.tire}">${c.tire}</span></td>
+      <td style="color:${wearColor}; font-weight:700;">${Math.round(c.wear)}%</td>
+      <td>${c.pits}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function logRaceEvent(text) {
+  const feed = document.getElementById('raceEventFeed');
+  const div = document.createElement('div');
+  div.className = 'event-item';
+  div.textContent = text;
+  feed.prepend(div);
+}
+
+function finishWeekend() {
+  raceState.cars.forEach((c, idx) => {
+    const pts = POINTS_SYSTEM[idx] || 0;
+    c.driver.points += pts;
+    c.team.points += pts;
+  });
+
+  const pCar = raceState.cars.find(c => c.driver.isPlayer);
+  const pPos = raceState.cars.indexOf(pCar) + 1;
+  const prize = Math.max(2.5, (23 - pPos) * 0.45);
+  state.budget += prize;
+
+  const pDriver = state.drivers.find(d => d.isPlayer);
+  pDriver.age++;
+  
+  let growthChance = pDriver.ageGroup === 'young' ? 0.8 : pDriver.ageGroup === 'prime' ? 0.4 : 0.1;
+  if (pPos <= 5 && pDriver.skill < 99 && Math.random() < growthChance) {
+    pDriver.skill++;
+  }
+
+  state.teams.forEach(t => {
+    if (t.id !== state.playerTeamId && Math.random() < 0.35) {
+      const stat = ['engine', 'aero', 'chassis'][Math.floor(Math.random()*3)];
+      t[stat] = Math.min(100, t[stat] + 1);
+    }
+  });
+
+  state.resultsHistory.push({
+    round: state.round,
+    gp: CALENDAR_2026[state.round - 1].name,
+    winner: raceState.cars[0].driver.name,
+    playerPos: pPos
+  });
+
+  if (state.round < 24) {
+    state.round++;
+    saveState();
+    showScreen('garage');
+    renderGarage();
+  } else {
+    let resetMsg = `🏆 CAMPIONATO ${state.season} TERMINATO!
+
+`;
+    const regChange = Math.random() < 0.75;
+    
+    if (regChange) {
+      resetMsg += `⚠️ CAMBIO DI REGOLAMENTO FIA PER IL PROSSIMO ANNO!
+La federazione ha imposto una stretta tecnica: i reparti R&D (Motore, Aero e Telaio) sono stati parzialmente ridimensionati per l'equità in griglia.
+
+`;
+      Object.keys(state.rndLevels).forEach(k => {
+        state.rndLevels[k] = Math.max(0, state.rndLevels[k] - 3);
+      });
+      state.teams.forEach(t => {
+        t.engine = Math.max(78, t.engine - 4);
+        t.aero = Math.max(77, t.aero - 4);
+        t.chassis = Math.max(78, t.chassis - 4);
+      });
+    } else {
+      resetMsg += `✨ Regolamento tecnico confermato per la prossima stagione!
+
+`;
+    }
+
+    state.season++;
+    state.round = 1;
+    state.drivers.forEach(d => d.points = 0);
+    state.teams.forEach(t => t.points = 0);
+    state.resultsHistory = [];
+    saveState();
+
+    alert(resetMsg + `Budget residuo conservato: $${state.budget.toFixed(1)}M.
+Pronti per la nuova stagione!`);
+    showScreen('garage');
+    renderGarage();
+  }
+}
+
+// ==================== PADDOCK MODAL ====================
+function openPaddock() {
+  document.getElementById('paddockModal').classList.add('open');
+  switchPaddockTab('drivers', document.querySelector('.tab-btn'));
+}
+function closePaddock() {
+  document.getElementById('paddockModal').classList.remove('open');
+}
+
+function switchPaddockTab(tab, btnEl) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  if (btnEl) btnEl.classList.add('active');
+  const box = document.getElementById('paddockContent');
+
+  if (tab === 'drivers') {
+    const sorted = [...state.drivers].sort((a, b) => b.points - a.points);
+    box.innerHTML = `<div class="table-wrap"><table><thead><tr><th>Pos</th><th>Pilota</th><th>Naz</th><th>Team</th><th>Età</th><th>Skill</th><th>Punti</th></tr></thead><tbody>
+      ${sorted.map((d, i) => {
+        const t = state.teams.find(x => x.id === d.teamId);
+        return `<tr class="${d.isPlayer ? 'player-row' : ''}"><td>${i+1}</td><td>${d.name}</td><td>${d.nat || '🏳️'}</td><td style="color:${t.color}; font-weight:700;">${t.name}</td><td>${d.age || 26}a</td><td><b style="color:var(--purple);">${d.skill}/99</b></td><td><strong>${d.points}</strong></td></tr>`;
+      }).join('')}
+    </tbody></table></div>`;
+  } else if (tab === 'constructors') {
+    const sorted = [...state.teams].sort((a, b) => b.points - a.points);
+    box.innerHTML = `<div class="table-wrap"><table><thead><tr><th>Pos</th><th>Scuderia</th><th>Punti</th></tr></thead><tbody>
+      ${sorted.map((t, i) => `<tr class="${t.id === state.playerTeamId ? 'player-row' : ''}"><td>${i+1}</td><td style="color:${t.color}; font-weight:700;">${t.name}</td><td><strong>${t.points}</strong></td></tr>`).join('')}
+    </tbody></table></div>`;
+  } else if (tab === 'cars') {
+    const sorted = [...state.teams].sort((a, b) => (b.engine+b.aero+b.chassis) - (a.engine+a.aero+a.chassis));
+    box.innerHTML = `<div class="table-wrap"><table><thead><tr><th>Scuderia</th><th>Motore</th><th>Aero</th><th>Telaio</th><th>Ingegneri</th><th>Media</th></tr></thead><tbody>
+      ${sorted.map(t => `<tr class="${t.id === state.playerTeamId ? 'player-row' : ''}">
+        <td style="color:${t.color}; font-weight:700;">${t.name}</td>
+        <td>${t.engine}</td><td>${t.aero}</td><td>${t.chassis}</td><td>${t.engSkill}</td>
+        <td><strong>${Math.round((t.engine+t.aero+t.chassis)/3)}</strong></td>
+      </tr>`).join('')}
+    </tbody></table></div>`;
+  } else if (tab === 'calendar') {
+    box.innerHTML = `<div class="table-wrap"><table><thead><tr><th>Round</th><th>Gran Premio</th><th>Circuito</th><th>Stato</th></tr></thead><tbody>
+      ${CALENDAR_2026.map(g => {
+        const res = state.resultsHistory.find(r => r.round === g.round);
+        const status = res ? `✅ Vince ${res.winner} (Tu: P${res.playerPos})` : g.round === state.round ? '🔥 Prossimo GP' : 'In programma';
+        return `<tr><td>R${g.round}</td><td><strong>${g.name}</strong></td><td>${g.track}</td><td style="font-size:0.8rem;">${status}</td></tr>`;
+      }).join('')}
+    </tbody></table></div>`;
+  } else if (tab === 'reset') {
+    box.innerHTML = `<p style="margin-bottom:12px; color:var(--text-muted);">Vuoi azzerare i progressi e iniziare una nuova carriera?</p>
+    <button class="btn-primary" onclick="localStorage.removeItem('f1_2026_career_v6'); location.reload();">🗑️ Cancella Salvataggio</button>`;
+  }
+}
+
+init();
+</script>
+</body>
+</html>
